@@ -291,7 +291,6 @@ minmax_2(b, [X|Xs], [Blues, Reds], MinMaxCount, CurrentMM, MinMaxMove):-
 
 minmax_2(r, [X|Xs], [Blues, Reds], MinMaxCount, CurrentMM, MinMaxMove):-
   alter_board(X, Reds, NewReds),		% try a new move from Max (b)
-	write('Trying move: '), write(X), nl,
   next_generation([Blues, NewReds], BoardAfterMaxMove), % crank board 1-ply
 
 	% generate Mins (r) after Max's move on the 1-ply board
@@ -305,7 +304,6 @@ minmax_2(r, [X|Xs], [Blues, Reds], MinMaxCount, CurrentMM, MinMaxMove):-
 	% than the current most damaging move the oponent can make,
 	% then update minmax move
   (LastGrabDiff < MinMaxCount -> NewMinMaxCount = LastGrabDiff,
-	 write('Updating Minmax move: '), write(X), nl,
    NewCurrentMM = X;
    NewMinMaxCount = MinMaxCount, NewCurrentMM = CurrentMM),
   minmax_2(r, Xs, [Blues, Reds], NewMinMaxCount, NewCurrentMM, MinMaxMove).
