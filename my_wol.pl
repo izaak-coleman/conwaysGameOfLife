@@ -2,16 +2,16 @@
 set_prolog_flag(toplevel_print_options, [quoted(true),numbervars(true),portrayed(true),max_depth(0)]).
 
 
-one_gen(F1, F2):-
-  write('F1 board'), nl, draw_board(F1), nl,  
-  write('F2 board'), nl, next_generation(F1, F2), draw_board(F2), nl.
-
-third_fourth_gen(F1, F2, F3, F4):-
-  one_gen(F1, F2),
-  write('F3 board'), nl, next_generation(F2, F3), draw_board(F3), 
-  write('F4 board'), nl, next_generation(F3, F4), draw_board(F4).
-
-
+%one_gen(F1, F2):-
+%  write('F1 board'), nl, draw_board(F1), nl,  
+%  write('F2 board'), nl, next_generation(F1, F2), draw_board(F2), nl.
+%
+%third_fourth_gen(F1, F2, F3, F4):-
+%  one_gen(F1, F2),
+%  write('F3 board'), nl, next_generation(F2, F3), draw_board(F3), 
+%  write('F4 board'), nl, next_generation(F3, F4), draw_board(F4).
+%
+%
 
 
 %% Question 3: test_strategy/3
@@ -177,7 +177,7 @@ bloodlust_2(PlayerColour, [], Board, Count, Move, BloodMove):-
 
 bloodlust_2(b, [X|Xs], Board, Count, CurrentBloodMove, BloodMove):-
   count_pieces_after_crank(b, Board, X, _, RedCount),
-  (RedCount < Count -> NewCount = RedCount, NewBloodMove = X;                
+  (RedCount < Count -> NewCount = RedCount, NewBloodMove = X;
   NewCount = Count, NewBloodMove = CurrentBloodMove),
   bloodlust_2(b, Xs, Board, NewCount, NewBloodMove, BloodMove).
 
@@ -278,11 +278,11 @@ minmax_2(b, [X|Xs], [Blues, Reds], MinMaxCount, CurrentMM, MinMaxMove):-
   generate_possible_moves(r, BoardAfterMaxMove, RedLeafMoves),
   % find the min move for Max - which is best land grab move for r
   land_grab_2(r, RedLeafMoves, 
-			BoardAfterMaxMove, -65, FirstMove, _, LastGrabDiff),
+      BoardAfterMaxMove, -65, FirstMove, _, LastGrabDiff),
 
-	% if the most damaging move the oppenent can make is less damaging
-	% than the current most damaging move the oponent can make,
-	% then update minmax move
+  % if the most damaging move the oppenent can make is less damaging
+  % than the current most damaging move the oponent can make,
+  % then update minmax move
   (LastGrabDiff < MinMaxCount -> NewMinMaxCount = LastGrabDiff,
    NewCurrentMM = X;
    NewMinMaxCount = MinMaxCount, NewCurrentMM = CurrentMM),
@@ -290,96 +290,23 @@ minmax_2(b, [X|Xs], [Blues, Reds], MinMaxCount, CurrentMM, MinMaxMove):-
    
 
 minmax_2(r, [X|Xs], [Blues, Reds], MinMaxCount, CurrentMM, MinMaxMove):-
-  alter_board(X, Reds, NewReds),		% try a new move from Max (b)
+  alter_board(X, Reds, NewReds),    % try a new move from Max (b)
   next_generation([Blues, NewReds], BoardAfterMaxMove), % crank board 1-ply
 
-	% generate Mins (r) after Max's move on the 1-ply board
+  % generate Mins (r) after Max's move on the 1-ply board
   generate_possible_moves(b, BoardAfterMaxMove, BlueLeafMoves),
-	% find the min move for Max - which is best land grab move for b
-	% i.e opponent plays most damaging move possible
+  % find the min move for Max - which is best land grab move for b
+  % i.e opponent plays most damaging move possible
   land_grab_2(b, BlueLeafMoves, 
               BoardAfterMaxMove, -65, FirstMove, _, LastGrabDiff),
 
-	% if the most damaging move the oppenent can make is less damaging
-	% than the current most damaging move the oponent can make,
-	% then update minmax move
+  % if the most damaging move the oppenent can make is less damaging
+  % than the current most damaging move the oponent can make,
+  % then update minmax move
   (LastGrabDiff < MinMaxCount -> NewMinMaxCount = LastGrabDiff,
    NewCurrentMM = X;
    NewMinMaxCount = MinMaxCount, NewCurrentMM = CurrentMM),
   minmax_2(r, Xs, [Blues, Reds], NewMinMaxCount, NewCurrentMM, MinMaxMove).
 
 
-
-run :-
-	test_strategy(1000, random, random).
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%%  add_element(Moves, MoveList, NewMoveList),
-%%  add_element(Winner, WinList, NewWinList),
-%%  NewN is N - 1,
-%%  playNGames(NewN, StrategyP1, StrategyP2, NewWinList, NewMoveList, TimeList).
-%
-%% add_element/3: adds element New to a list
-%add_element(New, [], [New]).
-%add_element(New, [X|Xs], [New,X|Xs]).
-%   
-%
-%% extreme_element/3: finds the element with the minimum of maxium value
-%% from a list of integer data elements. MinMax must be ground to specify whether
-%% the smallest or largest datapoint should be found
-%extreme_element(MinMax, [], Extreme).              % set extreme to last element
-%extreme_element(MinMax, [X|Xs], 0):-
-%  extreme_element(MinMax, Xs, X).                  % seed first element
-%
-%
-%% minimum element
-%extreme_element(MinMax, [X|Xs], Extreme):-
-%  MinMax = minimum, (X < Extreme-> NewExtreme = X; NewExtreme = Extreme),
-%  extreme_element(MinMax, Xs, NewExtreme).
-%
-%% maximum element
-%extreme_element(MinMax, [X|Xs], Extreme):-
-%  X \= 250,                                  % reject exhaustive games
-%  MinMax = maximum, (X > Extreme -> NewExtreme = X; NewExtreme = Extreme),
-%  extreme_element(MinMax, Xs, NewExtreme).
-%
-%% handle exhaust rejection by skiping element
-%extreme_element(MinMax, [X|Xs], Extreme):-
-%  X = 250,                        
-%  MinMax = maximum,
-%  extreme_element(MinMax, Xs, Extreme).
-%
-%average_moves([], N, TotalMoves, Av):-
-%  Av is TotalMoves / N.
-%average_moves([X|Xs], N, OldAcc, Av):-
-%  NewAcc is OldAcc + X, average_moves(Xs, N, NewAcc, Av).
+/* end of file */
