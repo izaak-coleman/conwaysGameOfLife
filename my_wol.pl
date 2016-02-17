@@ -173,9 +173,7 @@ bloodlust(PlayerColour, [Blues, Reds], NewBoardState, Move):-
 % to the most bloodiest move
 
 bloodlust_2(PlayerColour, [], Board, Count, Move, BloodMove):-
-  BloodMove = Move, % Instantiate blood move after checking all moves
-  write('BM_'), write(PlayerColour), write(': '), write(BloodMove),nl,
-  write('Count: '), write(Count), nl.
+  BloodMove = Move. % Instantiate blood move after checking all moves
 
 bloodlust_2(b, [X|Xs], Board, Count, CurrentBloodMove, BloodMove):-
   count_pieces_after_crank(b, Board, X, _, RedCount),
@@ -205,9 +203,7 @@ self_preservation(PlayerColour, [Blues, Reds], NewBoardState, Move):-
    alter_board(SafeMove, Reds, NewReds), NewBoardState = [Blues, NewReds]).
 
 self_preservation_2(PieceColour, [], Board, Count, Move, SafeMove):-
-  SafeMove = Move,  % Instantiate safest move after checking all moves
-  write('SM_'), write(PieceColour), write(': '), write(SafeMove),nl,
-  write('Count: '), write(Count), nl.
+  SafeMove = Move.  % Instantiate safest move after checking all moves
 
 self_preservation_2(b, [X|Xs], Board, Count, CurrentSafest, SafeMove):-
   count_pieces_after_crank(b, Board, X, BlueCount, _),
@@ -237,25 +233,19 @@ land_grab(PlayerColour, [Blues, Reds], NewBoardState, Move):-
 
 
 land_grab_2(PlayerColour, [], Board, Count, CurrentGrab, GrabMove, GrabCount):-
-  GrabMove = CurrentGrab, GrabCount = Count,
-  write('GM_'), write(PlayerColour), write(': '), write(GrabMove),nl,
-  write('Count: '), write(Count), nl.
+  GrabMove = CurrentGrab, GrabCount = Count.
 
 land_grab_2(b, [X|Xs], Board, Count, CurrentGrab, GrabMove, GrabCount):-
   count_pieces_after_crank(b, Board, X, BlueCount, RedCount),
   Diff is BlueCount - RedCount,
-  (Diff > Count -> NewCount = Diff, NewGrab = X,
-   write('Iterating Diff: '), write(Diff), nl,
-   write('Move: '), write(NewGrab),nl;
+  (Diff > Count -> NewCount = Diff, NewGrab = X;
    NewCount = Count, NewGrab = CurrentGrab),
   land_grab_2(b, Xs, Board, NewCount, NewGrab, GrabMove, GrabCount).
   
 land_grab_2(r, [X|Xs], Board, Count, CurrentGrab, GrabMove, GrabCount):-
   count_pieces_after_crank(r, Board, X, BlueCount, RedCount),
   Diff is RedCount - BlueCount,
-  (Diff > Count -> NewCount = Diff, NewGrab = X,
-   write('Iterating Diff: '), write(Diff), nl,
-   write('Move: '), write(NewGrab),nl;
+  (Diff > Count -> NewCount = Diff, NewGrab = X;
    NewCount = Count, NewGrab = CurrentGrab),
   land_grab_2(r, Xs, Board, NewCount, NewGrab, GrabMove, GrabCount).
 
@@ -270,7 +260,6 @@ land_grab_2(r, [X|Xs], Board, Count, CurrentGrab, GrabMove, GrabCount):-
 
 minmax(PlayerColour, [Blues, Reds], NewBoardState, Move):-
   generate_possible_moves(PlayerColour, [Blues, Reds], MovesList),
-	write('Length of player moves: '), length(MovesList, C), write(C), nl,
   minmax_2(PlayerColour, MovesList, [Blues, Reds], 
             65, FirstMove, MinMaxMove),
   Move = MinMaxMove,
@@ -281,24 +270,21 @@ minmax(PlayerColour, [Blues, Reds], NewBoardState, Move):-
 
 
 minmax_2(PlayerColour, [], Board, MinMaxCount, CurrentMM, MinMaxMove):-
-	write('MinMacCount: '), write(MinMaxCount), nl,
-  MinMaxMove = CurrentMM,
-	write('MinMaxMove: '), write(MinMaxMove),nl.
+  MinMaxMove = CurrentMM.
 
 minmax_2(b, [X|Xs], [Blues, Reds], MinMaxCount, CurrentMM, MinMaxMove):-
   alter_board(X, Blues, NewBlues),    % try a new move from Max (b)
   next_generation([NewBlues, Reds], BoardAfterMaxMove),  % crank board (1-ply)
   
-  % generate Mins (r) moves after Max's move and a crank  
+  % generate Mins (r) moves after Max's move on the 1-ply board
   generate_possible_moves(r, BoardAfterMaxMove, RedLeafMoves),
   % find the min move for Max - which is best land grab move for r
-  land_grab_2(r, RedLeafMoves, BoardAfterMaxMove, LastGrabDiff, FirstMove, _),
+  land_grab_2(r, RedLeafMoves, 
+			BoardAfterMaxMove, -65, FirstMove, _, LastGrabDiff),
 
-  % r's last grab move corresponding to Max's last move
-  % is less detrimental for b than than the
-  % currrent least detremental grab move
-  % switch Max move. This stage will determine the move with the
-  % greatest minmax
+	% if the most damaging move the oppenent can make is less damaging
+	% than the current most damaging move the oponent can make,
+	% then update minmax move
   (LastGrabDiff < MinMaxCount -> NewMinMaxCount = LastGrabDiff,
    NewCurrentMM = X;
    NewMinMaxCount = MinMaxCount, NewCurrentMM = CurrentMM),
@@ -306,13 +292,19 @@ minmax_2(b, [X|Xs], [Blues, Reds], MinMaxCount, CurrentMM, MinMaxMove):-
    
 
 minmax_2(r, [X|Xs], [Blues, Reds], MinMaxCount, CurrentMM, MinMaxMove):-
-  alter_board(X, Reds, NewReds), 
-	write('Trying move: '), write(X), nl,
-  next_generation([Blues, NewReds], BoardAfterMaxMove),
+  alter_board(X, Reds, NewReds),		% try a new move from Max (b)
+  next_generation([Blues, NewReds], BoardAfterMaxMove), % crank board 1-ply
+
+	% generate Mins (r) after Max's move on the 1-ply board
   generate_possible_moves(b, BoardAfterMaxMove, BlueLeafMoves),
+	% find the min move for Max - which is best land grab move for b
+	% i.e opponent plays most damaging move possible
   land_grab_2(b, BlueLeafMoves, 
               BoardAfterMaxMove, -65, FirstMove, _, LastGrabDiff),
 
+	% if the most damaging move the oppenent can make is less damaging
+	% than the current most damaging move the oponent can make,
+	% then update minmax move
   (LastGrabDiff < MinMaxCount -> NewMinMaxCount = LastGrabDiff,
    NewCurrentMM = X;
    NewMinMaxCount = MinMaxCount, NewCurrentMM = CurrentMM),
