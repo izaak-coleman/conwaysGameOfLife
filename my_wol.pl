@@ -32,7 +32,7 @@ playNGames(0, StrategyP1, StrategyP2,
            ShortestGame, LongestGame):-
 
   Avgames is TotalMoves / Games,                  % Calc averages
-  AvTime  is TotalTime / Games,
+  AvTime  is (TotalTime / Games) / 1000,
 
   % Display tournament results:
   write('Draws: '),                write(Draws),         nl,
@@ -41,7 +41,7 @@ playNGames(0, StrategyP1, StrategyP2,
   write('Longest game: '),         write(LongestGame),   nl,
   write('Shortest game: '),        write(ShortestGame),  nl,
   write('Average game length: '),  write(Avgames),       nl,
-  write('Average game time: '),    write(AvTime),        nl.
+  write('Average game time (s): '),    write(AvTime),        nl.
 
 
 playNGames(N, StrategyP1, StrategyP2, 
@@ -254,11 +254,9 @@ land_grab_2(r, [X|Xs], Board, Count, CurrentGrab, GrabMove, GrabCount):-
 % The strategy tries to pick the move that constrains the opponent in such
 % a way that the worst move they can play(min), is the best(max) of the possible 
 % worst moves they could have played, had the player chosen a different move.
+% Hence minimax.
 
-
-% Hence minmax.
-
-minmax(PlayerColour, [Blues, Reds], NewBoardState, Move):-
+minimax(PlayerColour, [Blues, Reds], NewBoardState, Move):-
   generate_possible_moves(PlayerColour, [Blues, Reds], MovesList),
   minmax_2(PlayerColour, MovesList, [Blues, Reds], 
             65, FirstMove, MinMaxMove),
@@ -293,6 +291,7 @@ minmax_2(b, [X|Xs], [Blues, Reds], MinMaxCount, CurrentMM, MinMaxMove):-
 
 minmax_2(r, [X|Xs], [Blues, Reds], MinMaxCount, CurrentMM, MinMaxMove):-
   alter_board(X, Reds, NewReds),		% try a new move from Max (b)
+	write('Trying move: '), write(X), nl,
   next_generation([Blues, NewReds], BoardAfterMaxMove), % crank board 1-ply
 
 	% generate Mins (r) after Max's move on the 1-ply board
@@ -306,13 +305,15 @@ minmax_2(r, [X|Xs], [Blues, Reds], MinMaxCount, CurrentMM, MinMaxMove):-
 	% than the current most damaging move the oponent can make,
 	% then update minmax move
   (LastGrabDiff < MinMaxCount -> NewMinMaxCount = LastGrabDiff,
+	 write('Updating Minmax move: '), write(X), nl,
    NewCurrentMM = X;
    NewMinMaxCount = MinMaxCount, NewCurrentMM = CurrentMM),
   minmax_2(r, Xs, [Blues, Reds], NewMinMaxCount, NewCurrentMM, MinMaxMove).
 
 
 
-
+run :-
+	test_strategy(1000, random, random).
 
 
 
