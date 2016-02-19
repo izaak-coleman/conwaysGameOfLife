@@ -345,3 +345,47 @@ show_winner(verbose, Winner, Num) :-
  format('~w wins after ~w moves!~n~n', [Winner,Num]).
 
 
+checkers_play(ShowFlag, FirstPlayerStrategy, SecondPlayerStrategy, TotalMoves, Winner) :-
+ start_config(checkers, Board),
+ write('calling checkers'), nl, nl,
+ (
+  ShowFlag == verbose,
+  format('~nInitial State:~n~n', []),
+  draw_board(Board),
+  show_score(verbose, Board)
+  ;
+  ShowFlag == quiet
+ ),
+ !,
+ make_move(Board, ShowFlag, _, 'b', FirstPlayerStrategy, 'r', SecondPlayerStrategy, 0, TotalMoves, Winner).
+
+cross_play(ShowFlag, FirstPlayerStrategy, SecondPlayerStrategy, TotalMoves, Winner) :-
+	write('calling cross'), nl, nl,
+ start_config(cross, Board),
+ (
+  ShowFlag == verbose,
+  format('~nInitial State:~n~n', []),
+  draw_board(Board),
+  show_score(verbose, Board)
+  ;
+  ShowFlag == quiet
+ ),
+ !,
+ make_move(Board, ShowFlag, _, 'b', FirstPlayerStrategy, 'r', SecondPlayerStrategy, 0, TotalMoves, Winner).
+
+gliders_play(ShowFlag, FirstPlayerStrategy, SecondPlayerStrategy, TotalMoves, Winner) :-
+ write('calling glider'), nl, nl,
+ start_config(gliders, Board),
+ (
+  ShowFlag == verbose,
+  format('~nInitial State:~n~n', []),
+  draw_board(Board),
+  show_score(verbose, Board)
+  ;
+  ShowFlag == quiet
+ ),
+ !,
+ make_move(Board, ShowFlag, _, 'b', FirstPlayerStrategy, 'r', SecondPlayerStrategy, 0, TotalMoves, Winner).
+
+
+ board_wrap

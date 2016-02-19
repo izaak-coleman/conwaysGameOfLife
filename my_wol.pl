@@ -54,6 +54,10 @@ playNGames(N, StrategyP1, StrategyP2,
   statistics(runtime, [Tend|_]),
   GameTime is Tend - Tstart,
 
+	write('Playing game: '), write(N), nl,
+	write('P1 strat: '), write(StrategyP1), nl,
+	write('P2 strat: '), write(StrategyP2), nl,
+
   % Decrease game counter
   NewN is N-1,
 
@@ -112,7 +116,7 @@ update_game_stats(Outcome, P1, P2, Draws, Exhausts,
    Outcome = stalemate,
    NewP1 = P1, NewP2 = P2, NewDraws is Draws+1, NewExhausts = Exhausts;
    Outcome = exhaust,
-   NewP1 = P1, NewP2 = P2, NewDraws = Draws, NewExhausts is Exhausts+1).
+   NewP1 = P1, NewP2 = P2, NewDraws is Draws+1).
 
 
 
