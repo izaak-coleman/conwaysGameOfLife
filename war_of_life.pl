@@ -85,8 +85,8 @@ random_move(Alive, OtherPlayerAlive, Move) :-
  nth1(Pos, PossMoves, Move).
 
 move_piece('b', random, [AliveBlues, AliveReds], [NewAliveBlues, AliveReds], Move) :-
- random_move(AliveBlues, AliveReds, Move),			% IZAAK: add reds to constrain pos
- alter_board(Move, AliveBlues, NewAliveBlues). % IZAAK: switch move out
+ random_move(AliveBlues, AliveReds, Move),
+ alter_board(Move, AliveBlues, NewAliveBlues).
 
 move_piece('r', random, [AliveBlues, AliveReds], [AliveBlues, NewAliveReds], Move) :-
  random_move(AliveReds, AliveBlues, Move),
@@ -267,7 +267,6 @@ draw_board(verbose, Board) :-
 % beginning of row
 
 draw_cells(A, 1, ColouredCells) :-
-
  !,
  format('~n~w|', [A]),
  draw_cell(A, 1, ColouredCells, NewColouredCells),
@@ -345,47 +344,3 @@ show_winner(verbose, Winner, Num) :-
  format('~w wins after ~w moves!~n~n', [Winner,Num]).
 
 
-checkers_play(ShowFlag, FirstPlayerStrategy, SecondPlayerStrategy, TotalMoves, Winner) :-
- start_config(checkers, Board),
- write('calling checkers'), nl, nl,
- (
-  ShowFlag == verbose,
-  format('~nInitial State:~n~n', []),
-  draw_board(Board),
-  show_score(verbose, Board)
-  ;
-  ShowFlag == quiet
- ),
- !,
- make_move(Board, ShowFlag, _, 'b', FirstPlayerStrategy, 'r', SecondPlayerStrategy, 0, TotalMoves, Winner).
-
-cross_play(ShowFlag, FirstPlayerStrategy, SecondPlayerStrategy, TotalMoves, Winner) :-
-	write('calling cross'), nl, nl,
- start_config(cross, Board),
- (
-  ShowFlag == verbose,
-  format('~nInitial State:~n~n', []),
-  draw_board(Board),
-  show_score(verbose, Board)
-  ;
-  ShowFlag == quiet
- ),
- !,
- make_move(Board, ShowFlag, _, 'b', FirstPlayerStrategy, 'r', SecondPlayerStrategy, 0, TotalMoves, Winner).
-
-gliders_play(ShowFlag, FirstPlayerStrategy, SecondPlayerStrategy, TotalMoves, Winner) :-
- write('calling glider'), nl, nl,
- start_config(gliders, Board),
- (
-  ShowFlag == verbose,
-  format('~nInitial State:~n~n', []),
-  draw_board(Board),
-  show_score(verbose, Board)
-  ;
-  ShowFlag == quiet
- ),
- !,
- make_move(Board, ShowFlag, _, 'b', FirstPlayerStrategy, 'r', SecondPlayerStrategy, 0, TotalMoves, Winner).
-
-
- board_wrap
